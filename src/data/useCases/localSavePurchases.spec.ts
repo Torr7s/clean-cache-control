@@ -2,12 +2,12 @@ class LocalSavePurchases {
   constructor(private readonly cacheStore: CacheStore) {}
 
   public async save(): Promise<void> {
-    this.cacheStore.delete();
+    this.cacheStore.delete('purchases');
   }
 }
 
 interface CacheStore {
-  delete: () => void;
+  delete: (key: string) => void;
 }
 
 type SUTTypes = {
@@ -30,9 +30,11 @@ const makeSUTFactory = (): SUTTypes => {
  */
 class CacheStoreSpy implements CacheStore {
   deleteCallsCount: number = 0;
+  key: string;
 
-  public delete(): void {
+  public delete(key: string): void {
     this.deleteCallsCount++;
+    this.key = key;
   }
 }
 
@@ -52,5 +54,13 @@ describe('LocalSavePurchases', (): void => {
     await sut.save();
 
     expect(cacheStore.deleteCallsCount).toBe(1);
+  });
+
+  it('should call delete with correct key', async (): Promise<void> => {
+    const { cacheStore, sut } = makeSUTFactory();
+
+    await sut.save();
+
+    expect(cacheStore.key).toBe('purchases');
   });
 });
