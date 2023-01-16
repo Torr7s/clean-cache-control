@@ -10,6 +10,21 @@ interface CacheStore {
   delete: () => void;
 }
 
+type SUTTypes = {
+  cacheStore: CacheStoreSpy;
+  sut: LocalSavePurchases;
+}
+
+const makeSUTFactory = (): SUTTypes => {
+  const cacheStore = new CacheStoreSpy();
+  const sut = new LocalSavePurchases(cacheStore);
+
+  return {
+    cacheStore,
+    sut
+  }
+}
+
 /**
  * Mocked version of the CacheStore interface
  */
@@ -24,7 +39,7 @@ class CacheStoreSpy implements CacheStore {
 describe('LocalSavePurchases', (): void => {
   /* SUT = System Under Test */
   it('should not delete cache during SUT.init', (): void => {
-    const cacheStore = new CacheStoreSpy();
+    const { cacheStore } = makeSUTFactory();
     
     new LocalSavePurchases(cacheStore);
 
@@ -32,8 +47,7 @@ describe('LocalSavePurchases', (): void => {
   });
 
   it('should delete old cache on SUT.save', async (): Promise<void> => {
-    const cacheStore = new CacheStoreSpy();
-    const sut = new LocalSavePurchases(cacheStore);
+    const { cacheStore, sut } = makeSUTFactory();
 
     await sut.save();
 
