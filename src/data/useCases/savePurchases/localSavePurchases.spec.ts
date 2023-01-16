@@ -21,6 +21,8 @@ const makeSUTFactory = (): SUTTypes => {
  */
 class CacheStoreSpy implements CacheStore {
   deleteCallsCount: number = 0;
+  insertCallsCount: number = 0;
+
   key: string;
 
   public delete(key: string): void {
@@ -46,5 +48,33 @@ describe('LocalSavePurchases', (): void => {
 
     expect(cacheStore.deleteCallsCount).toBe(1);
     expect(cacheStore.key).toBe('purchases');
+  });
+
+  it('should not insert new cache if delete fails', async (): Promise<void> => {
+    const { cacheStore, sut } = makeSUTFactory();
+
+    /**
+     * If deletion fails, insertCallsCount should not be called
+     */
+    jest.spyOn(cacheStore, 'delete').mockImplementationOnce((): never => {
+      throw new Error();
+    });
+
+    /**
+     * Must be called without an async keyword, because as soon as the delete method from CacheStoreSpy class 
+     * throws an exception, the production class (LocalSavePurchases) will fall in an exception flow (try-catch)
+     * and won't execute the rest of the code.
+     * 
+     * In other words, it has to be treated as a Promise to allow the execution of the following code.
+     */
+    const sutPromise = sut.save();
+
+    
+    /**
+     * It will prevent taht the CacheStoreSpy class won't treat the throwned Error internally with a try-catch, 
+     * ensuring that this error is only passed on.
+    */
+    expect(cacheStore.insertCallsCount).toBe(0);
+    expect(sutPromise).rejects.toThrow();
   });
 });
