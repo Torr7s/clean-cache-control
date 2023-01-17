@@ -21,9 +21,9 @@ const makeSUTFactory = (timestamp: Date = new Date()): SUTTypes => {
 describe('LocalSavePurchases', (): void => {
   /* SUT = System Under Test */
   it('should not delete or insert cache during SUT.init', (): void => {
-    const { cacheStore } = makeSUTFactory();
+    const factory: SUTTypes = makeSUTFactory();
 
-    expect(cacheStore.activities).toEqual([]);
+    expect(factory.cacheStore.activities).toEqual([]);
   });
 
   it('should not insert new cache if delete fails', async (): Promise<void> => {
@@ -40,32 +40,34 @@ describe('LocalSavePurchases', (): void => {
   it('should insert new cache if delete succeeds', async (): Promise<void> => {
     const timestamp = new Date();
 
-    const { cacheStore, sut } = makeSUTFactory(timestamp);
+    const factory: SUTTypes = makeSUTFactory(timestamp);
     const purchases: SavePurchases.Params[] = mockPurchases();
 
-    await sut.save(purchases);
+    const sutPromise: Promise<void> = factory.sut.save(purchases);
 
-    expect(cacheStore.activities).toEqual([
+    expect(factory.cacheStore.activities).toEqual([
       CacheStoreSpy.Activity.DELETE,
       CacheStoreSpy.Activity.INSERT,
     ]);
 
-    expect(cacheStore.deleteKey).toBe('purchases');
-    expect(cacheStore.insertKey).toBe('purchases');
+    expect(factory.cacheStore.deleteKey).toBe('purchases');
+    expect(factory.cacheStore.insertKey).toBe('purchases');
 
-    expect(cacheStore.insertValues).toEqual({
+    expect(factory.cacheStore.insertValues).toEqual({
       timestamp,
       value: purchases
     });
+
+    await expect(sutPromise).resolves.toBeFalsy();
   });
 
   it('should throw if insert throws', async (): Promise<void> => {
-    const { cacheStore, sut } = makeSUTFactory();
+    const factory: SUTTypes = makeSUTFactory();
 
     /**
      * If deletion fails, insertCallsCount should not be called
      */
-    cacheStore.$simulateInsertError();
+    factory.cacheStore.$simulateInsertError();
 
     /**
      * Must be called without an async keyword, because as soon as the delete method from CacheStoreSpy class 
@@ -74,9 +76,9 @@ describe('LocalSavePurchases', (): void => {
      * 
      * In other words, it has to be treated as a Promise to allow the execution of the following code.
      */
-    const sutPromise: Promise<void> = sut.save(mockPurchases());
+    const sutPromise: Promise<void> = factory.sut.save(mockPurchases());
 
-    expect(cacheStore.activities).toEqual([
+    expect(factory.cacheStore.activities).toEqual([
       CacheStoreSpy.Activity.DELETE,
       CacheStoreSpy.Activity.INSERT,
     ]);
