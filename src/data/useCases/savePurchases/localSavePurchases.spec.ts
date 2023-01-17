@@ -44,6 +44,12 @@ class CacheStoreSpy implements CacheStore {
 
     this.insertValues = value;
   };
+
+  public simulateDeleteError(): void {
+    jest.spyOn(CacheStoreSpy.prototype, 'delete').mockImplementationOnce((): never => {
+      throw new Error();
+    });
+  }
 }
 
 const mockPurchases = (): Array<SavePurchases.Params> => [
@@ -106,9 +112,7 @@ describe('LocalSavePurchases', (): void => {
     /**
      * If deletion fails, insertCallsCount should not be called
      */
-    jest.spyOn(cacheStore, 'delete').mockImplementationOnce((): never => {
-      throw new Error();
-    });
+    cacheStore.simulateDeleteError();
 
     /**
      * Must be called without an async keyword, because as soon as the delete method from CacheStoreSpy class 
