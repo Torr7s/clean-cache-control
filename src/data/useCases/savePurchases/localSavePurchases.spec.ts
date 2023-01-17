@@ -1,5 +1,6 @@
-import { LocalSavePurchases } from '@/data/useCases';
 import { CacheStore } from '@/data/protocols/cache';
+import { mockPurchases } from '@/data/tests';
+import { LocalSavePurchases } from '@/data/useCases';
 
 import { SavePurchases } from '@/domain/useCases';
 
@@ -57,28 +58,6 @@ class CacheStoreSpy implements CacheStore {
     });
   }
 }
-
-const mockPurchases = (): Array<SavePurchases.Params> => [
-  {
-    id: 'random_id_1',
-    date: new Date(),
-    value: 199
-  },
-  {
-    id: 'random_id_2',
-    date: new Date(),
-    value: 199
-  },
-  {
-    id: 'random_id_3',
-    date: new Date(),
-    value: 199
-  },{
-    id: 'random_id_4',
-    date: new Date(),
-    value: 199
-  }
-];
 
 describe('LocalSavePurchases', (): void => {
   /* SUT = System Under Test */
