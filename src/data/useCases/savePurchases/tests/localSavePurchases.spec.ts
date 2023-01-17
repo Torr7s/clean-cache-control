@@ -20,12 +20,10 @@ const makeSUTFactory = (): SUTTypes => {
 
 describe('LocalSavePurchases', (): void => {
   /* SUT = System Under Test */
-  it('should not delete cache during SUT.init', (): void => {
+  it('should not delete or insert cache during SUT.init', (): void => {
     const { cacheStore } = makeSUTFactory();
 
-    new LocalSavePurchases(cacheStore);
-
-    expect(cacheStore.deleteCallsCount).toBe(0);
+    expect(cacheStore.activities).toEqual([]);
   });
 
   it('should delete old cache on SUT.save', async (): Promise<void> => {
@@ -33,7 +31,10 @@ describe('LocalSavePurchases', (): void => {
 
     await sut.save(mockPurchases());
 
-    expect(cacheStore.deleteCallsCount).toBe(1);
+    expect(cacheStore.activities).toEqual([
+      CacheStoreSpy.Activity.DELETE,
+      CacheStoreSpy.Activity.INSERT,
+    ]);
     expect(cacheStore.deleteKey).toBe('purchases');
   });
 
@@ -44,7 +45,7 @@ describe('LocalSavePurchases', (): void => {
 
     const sutPromise: Promise<void> = sut.save(mockPurchases());
 
-    expect(cacheStore.insertCallsCount).toBe(0);
+    expect(cacheStore.activities).toEqual([CacheStoreSpy.Activity.DELETE]);
     expect(sutPromise).rejects.toThrow();
   });
 
@@ -54,9 +55,10 @@ describe('LocalSavePurchases', (): void => {
 
     await sut.save(purchases);
 
-    expect(cacheStore.deleteCallsCount).toBe(1);
-    expect(cacheStore.insertCallsCount).toBe(1);
-
+    expect(cacheStore.activities).toEqual([
+      CacheStoreSpy.Activity.DELETE,
+      CacheStoreSpy.Activity.INSERT,
+    ]);
     expect(cacheStore.insertKey).toBe('purchases');
     expect(cacheStore.insertValues).toEqual(purchases);
   });
@@ -78,6 +80,10 @@ describe('LocalSavePurchases', (): void => {
      */
     const sutPromise: Promise<void> = sut.save(mockPurchases());
 
+    expect(cacheStore.activities).toEqual([
+      CacheStoreSpy.Activity.DELETE,
+      CacheStoreSpy.Activity.INSERT,
+    ]);
     /**
      * It will prevent taht the CacheStoreSpy class won't treat the throwned Error internally with a try-catch, 
      * ensuring that this error is only passed on.
