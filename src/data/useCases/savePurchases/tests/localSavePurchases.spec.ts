@@ -37,6 +37,17 @@ describe('LocalSavePurchases', (): void => {
     expect(cacheStore.deleteKey).toBe('purchases');
   });
 
+  it('should not insert new cache if delete fails', (): void => {
+    const { cacheStore, sut } = makeSUTFactory();
+
+    cacheStore.$simulateDeleteError();
+
+    const sutPromise: Promise<void> = sut.save(mockPurchases());
+
+    expect(cacheStore.insertCallsCount).toBe(0);
+    expect(sutPromise).rejects.toThrow();
+  });
+
   it('should insert new cache if delete succeeds', async (): Promise<void> => {
     const { cacheStore, sut } = makeSUTFactory();
     const purchases: SavePurchases.Params[] = mockPurchases();
