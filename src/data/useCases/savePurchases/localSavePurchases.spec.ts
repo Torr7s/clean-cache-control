@@ -20,15 +20,21 @@ const makeSUTFactory = (): SUTTypes => {
  * Mocked version of the CacheStore interface
  */
 class CacheStoreSpy implements CacheStore {
+  deleteKey: string;
+  insertKey: string;
+
   deleteCallsCount: number = 0;
   insertCallsCount: number = 0;
 
-  key: string;
-
   public delete(key: string): void {
     this.deleteCallsCount++;
-    this.key = key;
+    this.deleteKey = key;
   }
+
+  public insert(key: string): void {
+    this.insertCallsCount++;
+    this.insertKey = key;
+  };
 }
 
 describe('LocalSavePurchases', (): void => {
@@ -47,10 +53,21 @@ describe('LocalSavePurchases', (): void => {
     await sut.save();
 
     expect(cacheStore.deleteCallsCount).toBe(1);
-    expect(cacheStore.key).toBe('purchases');
+    expect(cacheStore.deleteKey).toBe('purchases');
   });
 
-  it('should not insert new cache if delete fails', async (): Promise<void> => {
+  it('should insert new cache if delete succeeds', async (): Promise<void> => {
+    const { cacheStore, sut } = makeSUTFactory();
+
+    await sut.save();
+
+    expect(cacheStore.deleteCallsCount).toBe(1);
+    expect(cacheStore.insertCallsCount).toBe(1);
+
+    expect(cacheStore.insertKey).toBe('purchases');
+  });
+
+  it('should not insert new cache if delete fails', (): void => {
     const { cacheStore, sut } = makeSUTFactory();
 
     /**
@@ -67,8 +84,7 @@ describe('LocalSavePurchases', (): void => {
      * 
      * In other words, it has to be treated as a Promise to allow the execution of the following code.
      */
-    const sutPromise = sut.save();
-
+    const sutPromise: Promise<void> = sut.save();
     
     /**
      * It will prevent taht the CacheStoreSpy class won't treat the throwned Error internally with a try-catch, 
