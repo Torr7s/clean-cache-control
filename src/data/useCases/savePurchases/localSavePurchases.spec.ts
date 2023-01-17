@@ -1,7 +1,7 @@
 import { LocalSavePurchases } from '@/data/useCases';
 import { CacheStore } from '@/data/protocols/cache';
 
-import { SavePurchases } from '@/domain';
+import { SavePurchases } from '@/domain/useCases';
 
 type SUTTypes = {
   cacheStore: CacheStoreSpy;
