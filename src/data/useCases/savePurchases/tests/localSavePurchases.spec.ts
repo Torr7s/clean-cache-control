@@ -27,13 +27,13 @@ describe('LocalSavePurchases', (): void => {
   });
 
   it('should not insert new cache if delete fails', async (): Promise<void> => {
-    const { cacheStore, sut } = makeSUTFactory();
+    const factory: SUTTypes = makeSUTFactory();
 
-    cacheStore.$simulateDeleteError();
+    factory.cacheStore.$simulateDeleteError();
 
-    const sutPromise: Promise<void> = sut.save(mockPurchases());
+    const sutPromise: Promise<void> = factory.sut.save(mockPurchases());
 
-    expect(cacheStore.activities).toEqual([CacheStoreSpy.Activity.DELETE]);
+    expect(factory.cacheStore.activities).toEqual([CacheStoreSpy.Activity.DELETE]);
     await expect(sutPromise).rejects.toThrow();
   });
 
