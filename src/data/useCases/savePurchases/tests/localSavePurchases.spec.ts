@@ -38,7 +38,7 @@ describe('LocalSavePurchases', (): void => {
     expect(cacheStore.deleteKey).toBe('purchases');
   });
 
-  it('should not insert new cache if delete fails', (): void => {
+  it('should not insert new cache if delete fails', async (): Promise<void> => {
     const { cacheStore, sut } = makeSUTFactory();
 
     cacheStore.$simulateDeleteError();
@@ -46,7 +46,7 @@ describe('LocalSavePurchases', (): void => {
     const sutPromise: Promise<void> = sut.save(mockPurchases());
 
     expect(cacheStore.activities).toEqual([CacheStoreSpy.Activity.DELETE]);
-    expect(sutPromise).rejects.toThrow();
+    await expect(sutPromise).rejects.toThrow();
   });
 
   it('should insert new cache if delete succeeds', async (): Promise<void> => {
@@ -63,7 +63,7 @@ describe('LocalSavePurchases', (): void => {
     expect(cacheStore.insertValues).toEqual(purchases);
   });
 
-  it('should throw if insert throws', (): void => {
+  it('should throw if insert throws', async (): Promise<void> => {
     const { cacheStore, sut } = makeSUTFactory();
 
     /**
@@ -88,6 +88,6 @@ describe('LocalSavePurchases', (): void => {
      * It will prevent taht the CacheStoreSpy class won't treat the throwned Error internally with a try-catch, 
      * ensuring that this error is only passed on.
     */
-    expect(sutPromise).rejects.toThrow();
+    await expect(sutPromise).rejects.toThrow();
   });
 });
