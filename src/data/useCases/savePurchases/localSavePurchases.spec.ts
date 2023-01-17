@@ -45,8 +45,14 @@ class CacheStoreSpy implements CacheStore {
     this.insertValues = value;
   };
 
-  public simulateDeleteError(): void {
+  public $simulateDeleteError(): void {
     jest.spyOn(CacheStoreSpy.prototype, 'delete').mockImplementationOnce((): never => {
+      throw new Error();
+    });
+  }
+
+  public $simulateInsertError(): void {
+    jest.spyOn(CacheStoreSpy.prototype, 'insert').mockImplementationOnce((): never => {
       throw new Error();
     });
   }
@@ -106,13 +112,13 @@ describe('LocalSavePurchases', (): void => {
     expect(cacheStore.insertValues).toEqual(purchases);
   });
 
-  it('should not insert new cache if delete fails', (): void => {
+  it('should throw if insert throws', (): void => {
     const { cacheStore, sut } = makeSUTFactory();
 
     /**
      * If deletion fails, insertCallsCount should not be called
      */
-    cacheStore.simulateDeleteError();
+    cacheStore.$simulateInsertError();
 
     /**
      * Must be called without an async keyword, because as soon as the delete method from CacheStoreSpy class 
@@ -127,7 +133,6 @@ describe('LocalSavePurchases', (): void => {
      * It will prevent taht the CacheStoreSpy class won't treat the throwned Error internally with a try-catch, 
      * ensuring that this error is only passed on.
     */
-    expect(cacheStore.insertCallsCount).toBe(0);
     expect(sutPromise).rejects.toThrow();
   });
 });
