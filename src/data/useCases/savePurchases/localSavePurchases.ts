@@ -8,8 +8,11 @@ export class LocalSavePurchases implements SavePurchases {
   ) {}
 
   public async save(purchases: Array<SavePurchases.Params>): Promise<void> {
-    this.cacheStore.delete('purchases');
-    this.cacheStore.insert('purchases', {
+    /**
+     * Since the flow of cache insertion is always "delete old data -> insert new data", 
+     * it is worth creating a method like replace 
+     */
+    this.cacheStore.replace('purchases', {
       timestamp: this.timestamp,
       value: purchases
     });
