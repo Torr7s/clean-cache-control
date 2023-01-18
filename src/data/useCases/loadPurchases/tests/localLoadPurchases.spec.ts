@@ -31,4 +31,20 @@ describe('LocalLoadPurchases', (): void => {
     expect(factory.cacheStore.activities).toEqual([CacheStoreSpy.Activity.FETCH]);
     expect(factory.cacheStore.fetchKey).toBe('purchases');
   });
+
+  it('should return an empty list if load fails', async (): Promise<void> => {
+    const factory: SUTTypes = makeSUTFactory();
+
+    factory.cacheStore.$simulateFetchError();
+
+    const purchases = await factory.sut.loadAll();
+
+    expect(factory.cacheStore.activities).toEqual([
+      CacheStoreSpy.Activity.FETCH, 
+      CacheStoreSpy.Activity.DELETE
+    ]);
+    expect(factory.cacheStore.deleteKey).toBe('purchases');
+
+    expect(purchases).toEqual([]);
+  });
 });
