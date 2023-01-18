@@ -18,7 +18,7 @@ const makeSUTFactory = (timestamp: Date = new Date()): SUTTypes => {
   }
 }
 
-describe('LocalLoadPurchases', (): void => {
+describe('LocalSavePurchases', (): void => {
   /* SUT = System Under Test */
   it('should not delete or insert cache during SUT.init', (): void => {
     const factory: SUTTypes = makeSUTFactory();
