@@ -62,12 +62,11 @@ describe('LocalLoadPurchases', (): void => {
     expect(purchases).toEqual(factory.cacheStore.fetchResult.value);
   });
 
-  it('should return an empty list if cache is more than 3 days old', async (): Promise<void> => {
+  it('should return an empty list if cache is 3 days old', async (): Promise<void> => {
     const currentDate: Date = new Date();
     const timestamp: Date = new Date(currentDate);
 
     timestamp.setDate(timestamp.getDate() - 3);
-    timestamp.setSeconds(timestamp.getSeconds() - 1);
 
     const factory: SUTTypes = makeSUTFactory(currentDate);
 
