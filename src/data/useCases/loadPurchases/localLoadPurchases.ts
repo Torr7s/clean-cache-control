@@ -13,12 +13,12 @@ export class LocalLoadPurchases implements LoadPurchases, SavePurchases {
 
   public async loadAll(): Promise<Array<LoadPurchases.Model>> {
     try {
-      this.cacheStore.fetch(this.key);
+      const cache: any = this.cacheStore.fetch(this.key);
 
-      return[];
+      return cache.value;
     } catch (error) {
       this.cacheStore.delete(this.key);
-      
+
       return []; 
     }
   }
