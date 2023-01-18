@@ -22,4 +22,13 @@ describe('LocalLoadPurchases', (): void => {
 
     expect(factory.cacheStore.activities).toEqual([]);
   });
+
+  it ('should call correct key on load', async (): Promise<void> => {
+    const factory: SUTTypes = makeSUTFactory();
+
+    await factory.sut.loadAll();
+
+    expect(factory.cacheStore.activities).toEqual([CacheStoreSpy.Activity.FETCH]);
+    expect(factory.cacheStore.fetchKey).toBe('purchases');
+  });
 });
