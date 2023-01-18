@@ -6,7 +6,7 @@ export class LocalLoadPurchases implements LoadPurchases, SavePurchases {
 
   constructor(
     private readonly cacheStore: CacheStore, 
-    private readonly timestamp: Date
+    private readonly currentDate: Date
   ) {
     this.key = 'purchases';
   }
@@ -29,7 +29,7 @@ export class LocalLoadPurchases implements LoadPurchases, SavePurchases {
      * it is worth creating a method like replace 
      */
     this.cacheStore.replace(this.key, {
-      timestamp: this.timestamp,
+      timestamp: this.currentDate,
       value: purchases
     });
   }
