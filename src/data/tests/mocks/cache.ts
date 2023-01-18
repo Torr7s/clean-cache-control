@@ -47,6 +47,14 @@ export class CacheStoreSpy implements CacheStore {
     });
   }
 
+  public $simulateFetchError(): void {
+    jest.spyOn(CacheStoreSpy.prototype, 'fetch').mockImplementationOnce((): never => {
+      this.activities.push(CacheStoreSpy.Activity.FETCH);
+
+      throw new Error();
+    });
+  }
+
   public $simulateInsertError(): void {
     jest.spyOn(CacheStoreSpy.prototype, 'insert').mockImplementationOnce((): never => {
       this.activities.push(CacheStoreSpy.Activity.INSERT);
