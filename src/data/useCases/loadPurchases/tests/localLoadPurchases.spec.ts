@@ -1,5 +1,6 @@
 import { CacheStoreSpy, mockPurchases } from '@/data/tests';
 import { LocalLoadPurchases } from '@/data/useCases';
+import { PurchaseModel } from '@/domain/models';
 
 type SUTTypes = {
   cacheStore: CacheStoreSpy;
@@ -23,21 +24,12 @@ describe('LocalLoadPurchases', (): void => {
     expect(factory.cacheStore.activities).toEqual([]);
   });
 
-  it ('should call correct key on load', async (): Promise<void> => {
-    const factory: SUTTypes = makeSUTFactory();
-
-    await factory.sut.loadAll();
-
-    expect(factory.cacheStore.activities).toEqual([CacheStoreSpy.Activity.FETCH]);
-    expect(factory.cacheStore.fetchKey).toBe('purchases');
-  });
-
   it('should return an empty list if load fails', async (): Promise<void> => {
     const factory: SUTTypes = makeSUTFactory();
 
     factory.cacheStore.$simulateFetchError();
 
-    const purchases = await factory.sut.loadAll();
+    const purchases: PurchaseModel[] = await factory.sut.loadAll();
 
     expect(factory.cacheStore.activities).toEqual([
       CacheStoreSpy.Activity.FETCH, 
@@ -46,5 +38,22 @@ describe('LocalLoadPurchases', (): void => {
     expect(factory.cacheStore.deleteKey).toBe('purchases');
 
     expect(purchases).toEqual([]);
+  });
+  
+  it('should return a list of purchases if cache is less than 3 days old', async (): Promise<void> => {
+    const timestamp: Date = new Date();
+    const factory: SUTTypes = makeSUTFactory(timestamp);
+
+    factory.cacheStore.fetchResult = {
+      timestamp,
+      value: mockPurchases()
+    }
+
+    const purchases: PurchaseModel[] = await factory.sut.loadAll();
+
+    expect(factory.cacheStore.activities).toEqual([CacheStoreSpy.Activity.FETCH]);
+    expect(factory.cacheStore.fetchKey).toBe('purchases');
+    
+    expect(purchases).toEqual(factory.cacheStore.fetchResult.value);
   });
 });
