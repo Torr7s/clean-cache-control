@@ -1,16 +1,16 @@
 import { CacheStoreSpy, mockPurchases } from '@/data/tests';
-import { LocalSavePurchases } from '@/data/useCases';
+import { LocalLoadPurchases } from '@/data/useCases';
 
 import { SavePurchases } from '@/domain/useCases';
 
 type SUTTypes = {
   cacheStore: CacheStoreSpy;
-  sut: LocalSavePurchases;
+  sut: LocalLoadPurchases;
 }
 
 const makeSUTFactory = (timestamp: Date = new Date()): SUTTypes => {
   const cacheStore = new CacheStoreSpy();
-  const sut = new LocalSavePurchases(cacheStore, timestamp);
+  const sut = new LocalLoadPurchases(cacheStore, timestamp);
 
   return {
     cacheStore,
@@ -18,7 +18,7 @@ const makeSUTFactory = (timestamp: Date = new Date()): SUTTypes => {
   }
 }
 
-describe('LocalSavePurchases', (): void => {
+describe('LocalLoadPurchases', (): void => {
   /* SUT = System Under Test */
   it('should not delete or insert cache during SUT.init', (): void => {
     const factory: SUTTypes = makeSUTFactory();
@@ -71,7 +71,7 @@ describe('LocalSavePurchases', (): void => {
 
     /**
      * Must be called without an async keyword, because as soon as the delete method from CacheStoreSpy class 
-     * throws an exception, the production class (LocalSavePurchases) will fall in an exception flow (try-catch)
+     * throws an exception, the production class (LocalLoadPurchases) will fall in an exception flow (try-catch)
      * and won't execute the rest of the code.
      * 
      * In other words, it has to be treated as a Promise to allow the execution of the following code.
