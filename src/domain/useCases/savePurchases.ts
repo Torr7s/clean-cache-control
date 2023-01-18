@@ -1,9 +1,7 @@
+import { PurchaseModel } from '@/domain/models';
+
 export namespace SavePurchases {
-  export type Params = {
-    id: string;
-    date: Date;
-    value: number;
-  }
+  export type Params = PurchaseModel
 }
 
 export interface SavePurchases {
