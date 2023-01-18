@@ -1,7 +1,7 @@
 import { CacheStore } from '@/data/protocols/cache';
-import { SavePurchases } from '@/domain/useCases';
+import { LoadPurchases, SavePurchases } from '@/domain/useCases';
 
-export class LocalLoadPurchases implements SavePurchases {
+export class LocalLoadPurchases implements LoadPurchases, SavePurchases {
   private readonly key: string;
 
   constructor(
@@ -11,8 +11,16 @@ export class LocalLoadPurchases implements SavePurchases {
     this.key = 'purchases';
   }
 
-  public async loadAll(): Promise<void> {
-    this.cacheStore.fetch(this.key);
+  public async loadAll(): Promise<Array<LoadPurchases.Model>> {
+    try {
+      this.cacheStore.fetch(this.key);
+
+      return[];
+    } catch (error) {
+      this.cacheStore.delete(this.key);
+      
+      return []; 
+    }
   }
 
   public async save(purchases: Array<SavePurchases.Params>): Promise<void> {
