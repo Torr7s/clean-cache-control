@@ -39,10 +39,15 @@ describe('LocalLoadPurchases', (): void => {
 
     expect(purchases).toEqual([]);
   });
-  
+
   it('should return a list of purchases if cache is less than 3 days old', async (): Promise<void> => {
-    const timestamp: Date = new Date();
-    const factory: SUTTypes = makeSUTFactory(timestamp);
+    const currentDate: Date = new Date();
+    const timestamp: Date = new Date(currentDate);
+
+    timestamp.setDate(timestamp.getDate() - 3);
+    timestamp.setSeconds(timestamp.getSeconds() + 1);
+
+    const factory: SUTTypes = makeSUTFactory(currentDate);
 
     factory.cacheStore.fetchResult = {
       timestamp,
@@ -55,5 +60,31 @@ describe('LocalLoadPurchases', (): void => {
     expect(factory.cacheStore.fetchKey).toBe('purchases');
     
     expect(purchases).toEqual(factory.cacheStore.fetchResult.value);
+  });
+
+  it('should return an empty list if cache is more than 3 days old', async (): Promise<void> => {
+    const currentDate: Date = new Date();
+    const timestamp: Date = new Date(currentDate);
+
+    timestamp.setDate(timestamp.getDate() - 3);
+    timestamp.setSeconds(timestamp.getSeconds() - 1);
+
+    const factory: SUTTypes = makeSUTFactory(currentDate);
+
+    factory.cacheStore.fetchResult = {
+      timestamp,
+      value: mockPurchases()
+    }
+
+    const purchases: PurchaseModel[] = await factory.sut.loadAll();
+
+    expect(factory.cacheStore.activities).toEqual([
+      CacheStoreSpy.Activity.FETCH, 
+      CacheStoreSpy.Activity.DELETE
+    ]);
+    expect(factory.cacheStore.fetchKey).toBe('purchases');
+    expect(factory.cacheStore.deleteKey).toBe('purchases');
+    
+    expect(purchases).toEqual([]);
   });
 });
