@@ -8,23 +8,25 @@ export class CacheStoreSpy implements CacheStore {
   fetchKey: string;
   insertKey: string;
 
+  fetchResult: any;
   insertValues: Array<SavePurchases.Params>;
 
   constructor() {
     this.activities = [];
+    this.fetchResult = [];
     this.insertValues = [];
   }
 
   public delete(key: string): void {
     this.activities.push(CacheStoreSpy.Activity.DELETE);
-    
     this.deleteKey = key;
   }
 
-  public fetch(key: string): void {
+  public fetch(key: string): any {
     this.activities.push(CacheStoreSpy.Activity.FETCH);
-    
     this.fetchKey = key;
+
+    return this.fetchResult;
   }
 
   public insert(key: string, value: any): void {
