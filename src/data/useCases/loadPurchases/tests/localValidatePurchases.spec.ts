@@ -22,4 +22,17 @@ describe('LocalLoadPurchases', (): void => {
 
     expect(factory.cacheStore.activities).toEqual([]);
   });
+
+  it('should delete cache if load fails', (): void => {
+    const factory: SUTTypes = makeSUTFactory();
+
+    factory.cacheStore.$simulateFetchError();
+    factory.sut.validate();
+
+    expect(factory.cacheStore.activities).toEqual([
+      CacheStoreSpy.Activity.FETCH,
+      CacheStoreSpy.Activity.DELETE
+    ]);
+    expect(factory.cacheStore.deleteKey).toBe('purchases');
+  });
 });
