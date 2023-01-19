@@ -16,7 +16,7 @@ export class LocalLoadPurchases implements LoadPurchases, SavePurchases {
       const cache: any = this.cacheStore.fetch(this.key);
       const cacheIsValid: boolean = CachePolicy.validate(cache.timestamp, this.currentDate); 
 
-      return cacheIsValid ? cache.value : []
+      return cacheIsValid ? cache.value : [];
     } catch (error) {
       return [];
     }
