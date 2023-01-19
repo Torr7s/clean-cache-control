@@ -31,11 +31,7 @@ describe('LocalLoadPurchases', (): void => {
 
     const purchases: PurchaseModel[] = await factory.sut.loadAll();
 
-    expect(factory.cacheStore.activities).toEqual([
-      CacheStoreSpy.Activity.FETCH, 
-      CacheStoreSpy.Activity.DELETE
-    ]);
-    expect(factory.cacheStore.deleteKey).toBe('purchases');
+    expect(factory.cacheStore.activities).toEqual([CacheStoreSpy.Activity.FETCH]);
 
     expect(purchases).toEqual([]);
   });

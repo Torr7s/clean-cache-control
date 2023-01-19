@@ -16,15 +16,14 @@ export class LocalLoadPurchases implements LoadPurchases, SavePurchases {
       const cache: any = this.cacheStore.fetch(this.key);
       const cacheIsValid: boolean = CachePolicy.validate(cache.timestamp, this.currentDate); 
 
-      const throwError = (): never => {
-        throw new Error();
+      if (cacheIsValid) return cache.value;
+      else {
+        this.cacheStore.delete(this.key);
+
+        return []; 
       }
-
-      return cacheIsValid ? cache.value : throwError();
     } catch (error) {
-      this.cacheStore.delete(this.key);
-
-      return []; 
+      return [];
     }
   }
 
