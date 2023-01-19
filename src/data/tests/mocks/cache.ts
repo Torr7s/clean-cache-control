@@ -1,9 +1,16 @@
 import { CacheStore } from '../../protocols/cache';
 import { SavePurchases } from '@/domain/useCases';
 
+/**
+ * If its wanted to change CACHE_MAX_AGE_IN_DAYS value to 5, has to remember
+ * to change CachePolicy.CACHE_MAX_AGE_IN_DAYS value too or the tests will fail
+ * because of test and production environment logic
+ */
+const CACHE_MAX_AGE_IN_DAYS: number = 3;
+
 export const getCacheExpirationDate = (date: Date): Date => {
   const maxCacheAge: Date = new Date(date);
-  maxCacheAge.setDate(maxCacheAge.getDate() - 3);
+  maxCacheAge.setDate(maxCacheAge.getDate() - CACHE_MAX_AGE_IN_DAYS);
 
   return maxCacheAge;
 }
