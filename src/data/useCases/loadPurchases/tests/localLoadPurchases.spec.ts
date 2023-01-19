@@ -1,4 +1,4 @@
-import { CacheStoreSpy, mockPurchases } from '@/data/tests';
+import { CacheStoreSpy, getCacheExpirationDate, mockPurchases } from '@/data/tests';
 import { LocalLoadPurchases } from '@/data/useCases';
 import { PurchaseModel } from '@/domain/models';
 
@@ -40,11 +40,10 @@ describe('LocalLoadPurchases', (): void => {
     expect(purchases).toEqual([]);
   });
 
-  it('should return a list of purchases if cache is less than 3 days old', async (): Promise<void> => {
+  it('should return a list of purchases if cache is valid', async (): Promise<void> => {
     const currentDate: Date = new Date();
-    const timestamp: Date = new Date(currentDate);
+    const timestamp: Date = getCacheExpirationDate(currentDate);
 
-    timestamp.setDate(timestamp.getDate() - 3);
     timestamp.setSeconds(timestamp.getSeconds() + 1);
 
     const factory: SUTTypes = makeSUTFactory(currentDate);
@@ -62,11 +61,9 @@ describe('LocalLoadPurchases', (): void => {
     expect(purchases).toEqual(factory.cacheStore.fetchResult.value);
   });
 
-  it('should return an empty list if cache is 3 days old', async (): Promise<void> => {
+  it('should return an empty list if cache is expired', async (): Promise<void> => {
     const currentDate: Date = new Date();
-    const timestamp: Date = new Date(currentDate);
-
-    timestamp.setDate(timestamp.getDate() - 3);
+    const timestamp: Date = getCacheExpirationDate(currentDate);
 
     const factory: SUTTypes = makeSUTFactory(currentDate);
 
@@ -83,6 +80,50 @@ describe('LocalLoadPurchases', (): void => {
     ]);
     expect(factory.cacheStore.fetchKey).toBe('purchases');
     expect(factory.cacheStore.deleteKey).toBe('purchases');
+    
+    expect(purchases).toEqual([]);
+  });
+
+  it('should return an empty list if cache is on expiration date', async (): Promise<void> => {
+    const currentDate: Date = new Date();
+    const timestamp: Date = getCacheExpirationDate(currentDate);
+
+    const factory: SUTTypes = makeSUTFactory(currentDate);
+
+    factory.cacheStore.fetchResult = {
+      timestamp,
+      value: mockPurchases()
+    }
+
+    const purchases: PurchaseModel[] = await factory.sut.loadAll();
+    
+    expect(factory.cacheStore.activities).toEqual([
+      CacheStoreSpy.Activity.FETCH, 
+      CacheStoreSpy.Activity.DELETE
+    ]);
+    expect(factory.cacheStore.fetchKey).toBe('purchases');
+    expect(factory.cacheStore.deleteKey).toBe('purchases');
+    
+    expect(purchases).toEqual([]);
+  });
+
+  it('should return an empty list if cache is empty', async (): Promise<void> => {
+    const currentDate: Date = new Date();
+    const timestamp: Date = getCacheExpirationDate(currentDate);
+
+    timestamp.setSeconds(timestamp.getSeconds() + 1);
+
+    const factory: SUTTypes = makeSUTFactory(currentDate);
+
+    factory.cacheStore.fetchResult = {
+      timestamp,
+      value: []
+    }
+
+    const purchases: PurchaseModel[] = await factory.sut.loadAll();
+
+    expect(factory.cacheStore.activities).toEqual([CacheStoreSpy.Activity.FETCH]);
+    expect(factory.cacheStore.fetchKey).toBe('purchases');
     
     expect(purchases).toEqual([]);
   });
