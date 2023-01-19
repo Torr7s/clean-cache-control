@@ -1,6 +1,13 @@
 import { CacheStore } from '../../protocols/cache';
 import { SavePurchases } from '@/domain/useCases';
 
+export const getCacheExpirationDate = (date: Date): Date => {
+  const maxCacheAge: Date = new Date(date);
+  maxCacheAge.setDate(maxCacheAge.getDate() - 3);
+
+  return maxCacheAge;
+}
+
 export class CacheStoreSpy implements CacheStore {
   activities: CacheStoreSpy.Activity[];
 
