@@ -1,4 +1,4 @@
-import { CacheStoreSpy } from '@/data/tests';
+import { CacheStoreSpy, getCacheExpirationDate } from '@/data/tests';
 import { LocalLoadPurchases } from '@/data/useCases';
 
 type SUTTypes = {
@@ -34,5 +34,23 @@ describe('LocalLoadPurchases', (): void => {
       CacheStoreSpy.Activity.DELETE
     ]);
     expect(factory.cacheStore.deleteKey).toBe('purchases');
+  });
+
+  it('should has no side effect if load succeeds', (): void => {
+    const currentDate: Date = new Date();
+    const timestamp: Date = getCacheExpirationDate(currentDate);
+
+    timestamp.setSeconds(timestamp.getSeconds() + 1);
+
+    const factory: SUTTypes = makeSUTFactory(currentDate);
+
+    factory.cacheStore.fetchResult = {
+      timestamp
+    }
+
+    factory.sut.validate();
+
+    expect(factory.cacheStore.activities).toEqual([CacheStoreSpy.Activity.FETCH]);
+    expect(factory.cacheStore.fetchKey).toBe('purchases');
   });
 });
