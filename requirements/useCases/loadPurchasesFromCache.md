@@ -8,11 +8,9 @@
 5. The system returns the purchasing list
 
 ## Exception - Error when loading data from cache
-1. The system cleans the cache
 2. The system returns an empty list
 
 ## Exception - Expired cache
-1. The system cleans the cache
 2. The system returns an empty list
 
 ## Exception - Empty cache
